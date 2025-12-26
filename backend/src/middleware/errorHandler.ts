@@ -16,7 +16,8 @@ const errorMap: Record<string, ErrorMapping> = {
   'Email and password are required': { status: 400, message: 'Email and password are required' },
   'Password is required': { status: 400, message: 'Password is required' },
   'Name, email, password, and role are required': { status: 400, message: 'Name, email, password, and role are required' },
-  'Failed to delete user': { status: 500, message: 'Failed to delete user' }
+  'Failed to delete user': { status: 500, message: 'Failed to delete user' },
+  'GitHub user not found': { status: 404, message: 'GitHub user not found' },
 };
 
 export const errorHandler = (

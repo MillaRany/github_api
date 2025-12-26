@@ -8,11 +8,15 @@ import { errorHandler } from './middleware/errorHandler';
 import { container } from 'tsyringe';
 import { UserModel, IUserModel } from './models/User';
 import { IUserApplication, userApplication } from './application/userApplication';
+import { HttpClient, IHttpClient } from './infrastructure/httpClient';
+import { GithubApplication, IGithubApplication } from './application/githubApplication';
 
 dotenv.config();
 
 container.register<IUserModel>("IUserModel", { useClass: UserModel });
 container.register<IUserApplication>("IUserApplication", { useClass: userApplication });
+container.register<IHttpClient>("IHttpClient", { useClass: HttpClient });
+container.register<IGithubApplication>("IGithubApplication", { useClass: GithubApplication });
 
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
