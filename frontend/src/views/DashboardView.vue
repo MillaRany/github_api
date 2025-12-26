@@ -25,17 +25,6 @@
           </router-link>
         </div>
       </div>
-
-      <div class="card">
-        <h2 class="card-title">Features</h2>
-        <ul class="features-list">
-          <li>✅ JWT Authentication</li>
-          <li>✅ Role-based Access Control</li>
-          <li>✅ GitHub API Integration</li>
-          <li>✅ User Management (Admin)</li>
-          <li>✅ Profile & Repository Search</li>
-        </ul>
-      </div>
     </div>
   </div>
 </template>
