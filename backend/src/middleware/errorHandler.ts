@@ -26,14 +26,12 @@ export const errorHandler = (
   res: Response,
   next: NextFunction
 ) => {
-  console.error('Error:', err.message);
 
   if (err.message.includes('UNIQUE constraint failed')) {
     return res.status(400).json({ error: 'Email already exists' });
   }
 
   const mappedError = errorMap[err.message];
-  console.log('Mapped Error:', mappedError);
   if (mappedError) {
     return res.status(mappedError.status).json({ error: mappedError.message });
   }

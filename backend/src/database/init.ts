@@ -15,14 +15,12 @@ const createTables = async () => {
   `;
 
   await database.run(createUsersTable);
-  console.log('Users table created successfully');
 };
 
 const seedUsers = async () => {
   const existingUser = await database.get('SELECT id FROM users LIMIT 1');
   
   if (existingUser) {
-    console.log('Users already exist, skipping seed');
     return;
   }
 
@@ -38,10 +36,6 @@ const seedUsers = async () => {
     'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',
     ['Regular User', 'user@example.com', userPassword, UserRole.USER]
   );
-
-  console.log('Seed users created:');
-  console.log('Admin - email: admin@example.com, password: admin123');
-  console.log('User - email: user@example.com, password: user123');
 };
 
 const initDatabase = async () => {
@@ -50,9 +44,7 @@ const initDatabase = async () => {
     await createTables();
     await seedUsers();
     await database.close();
-    console.log('Database initialization completed');
   } catch (error) {
-    console.error('Error initializing database:', error);
     process.exit(1);
   }
 };

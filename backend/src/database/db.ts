@@ -10,10 +10,8 @@ class Database {
     return new Promise((resolve, reject) => {
       this.db = new sqlite3.Database(DB_PATH, (err) => {
         if (err) {
-          console.error('Error connecting to database:', err);
           reject(err);
         } else {
-          console.log('Connected to SQLite database');
           resolve(this.db!);
         }
       });
@@ -70,7 +68,6 @@ class Database {
           if (err) {
             reject(err);
           } else {
-            console.log('Database connection closed');
             resolve();
           }
         });

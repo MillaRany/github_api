@@ -42,14 +42,10 @@ app.use(errorHandler);
 const startServer = async () => {
   try {
     await database.connect();
-    console.log('Database connected successfully');
 
     app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
     process.exit(1);
   }
 };
@@ -57,7 +53,6 @@ const startServer = async () => {
 startServer();
 
 process.on('SIGINT', async () => {
-  console.log('\nShutting down gracefully...');
   await database.close();
   process.exit(0);
 });

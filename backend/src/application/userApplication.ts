@@ -21,8 +21,6 @@ export class userApplication implements IUserApplication {
     async getUserByEmail(email: string): Promise<User> {
         const user = await this.userModel.findByEmail(email);
 
-        console.log('Fetched user by email:', user);
-
         if (!user) {
             throw new Error('User not found');
         }

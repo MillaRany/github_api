@@ -7,26 +7,14 @@
       <form @submit.prevent="handleLogin" class="login-form">
         <div class="form-group">
           <label class="label" for="email">Email</label>
-          <input
-            id="email"
-            v-model="credentials.email"
-            type="email"
-            class="input"
-            placeholder="Enter your email"
-            required
-          />
+          <input id="email" v-model="credentials.email" type="email" class="input" placeholder="Enter your email"
+            required />
         </div>
 
         <div class="form-group">
           <label class="label" for="password">Password</label>
-          <input
-            id="password"
-            v-model="credentials.password"
-            type="password"
-            class="input"
-            placeholder="Enter your password"
-            required
-          />
+          <input id="password" v-model="credentials.password" type="password" class="input"
+            placeholder="Enter your password" required />
         </div>
 
         <div v-if="authStore.error" class="error">
@@ -63,13 +51,9 @@ const credentials = ref<LoginRequest>({
 });
 
 const handleLogin = async () => {
-  try {
-    const success = await authStore.login(credentials.value);
-    if (success) {
-      await router.push('/dashboard');
-    }
-  } catch (err) {
-    console.error('Login error:', err);
+  const success = await authStore.login(credentials.value);
+  if (success) {
+    await router.push('/dashboard');
   }
 };
 </script>

@@ -14,7 +14,6 @@ export class UserController {
       const users = await this.userApplication.listUsers();
       res.json(users);
     } catch (error) {
-      console.error('Error fetching users:', error);
       throw new Error('Failed to fetch users');
     }
   };
@@ -34,7 +33,6 @@ export class UserController {
       const userResponse = await this.userApplication.toUserResponse(user);
       res.json(userResponse);
     } catch (error) {
-      console.error('Error fetching current user:', error);
       throw new Error('Failed to fetch user');
     }
   };
@@ -50,7 +48,6 @@ export class UserController {
       const newUser = await this.userApplication.createUser(name, email, password, role);
       res.status(201).json(newUser);
     } catch (error) {
-      console.error('Error creating user:', error);
       throw new Error('Failed to create user');
     }
   }
