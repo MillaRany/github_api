@@ -1,27 +1,27 @@
 <template>
   <div class="container">
-    <h1 class="page-title">Dashboard</h1>
+    <h1 class="page-title">{{ t('dashboard.title') }}</h1>
     
     <div class="dashboard-grid">
       <div class="card">
-        <h2 class="card-title">Welcome, {{ authStore.user?.name }}!</h2>
+        <h2 class="card-title">{{ t('dashboard.subtitle') }}, {{ authStore.user?.name }}!</h2>
         <p class="card-text">
           You are logged in as <span :class="['badge', `badge-${authStore.user?.role}`]">{{ authStore.user?.role }}</span>
         </p>
         <div class="user-details">
-          <p><strong>Email:</strong> {{ authStore.user?.email }}</p>
-          <p><strong>Account created:</strong> {{ formatDate(authStore.user?.created_at) }}</p>
+          <p><strong>{{ t('login.email') }}:</strong> {{ authStore.user?.email }}</p>
+          <p><strong>{{ t('users.createdAt') }}:</strong> {{ formatDate(authStore.user?.created_at) }}</p>
         </div>
       </div>
 
       <div class="card">
-        <h2 class="card-title">Quick Actions</h2>
+        <h2 class="card-title">{{ t('dashboard.quickAccess') }}</h2>
         <div class="actions">
           <router-link to="/github" class="btn btn-primary">
-            Search GitHub Profiles
+            {{ t('dashboard.searchGithub') }}
           </router-link>
           <router-link v-if="authStore.isAdmin" to="/users" class="btn btn-secondary">
-            Manage Users
+            {{ t('dashboard.viewAllUsers') }}
           </router-link>
         </div>
       </div>
@@ -31,12 +31,14 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from 'vue-i18n';
 
 const authStore = useAuthStore();
+const { t, locale } = useI18n();
 
 const formatDate = (date?: string) => {
   if (!date) return '';
-  return new Date(date).toLocaleDateString('en-US', {
+  return new Date(date).toLocaleDateString(locale.value === 'pt' ? 'pt-BR' : 'en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric'

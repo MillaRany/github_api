@@ -14,20 +14,20 @@
   />
 
     <div class="container">
-      <h1 class="page-title">Users Management</h1>
-      <p class="page-subtitle">Admin only - View all registered users</p>
+      <h1 class="page-title">{{ t('users.title') }}</h1>
+      <p class="page-subtitle">{{ t('users.subtitle') }}</p>
 
       <div class="action-bar">
         <button @click="toggleView" class="btn-toggle"
           :class="{ 'btn-primary': !showCreateForm, 'btn-secondary': showCreateForm }">
-          {{ showCreateForm ? 'View Users' : 'Create New User' }}
+          {{ showCreateForm ? t('users.viewUsers') : t('users.createNewUser') }}
         </button>
       </div>
 
       <div class="card" v-if="!showCreateForm">
         <div v-if="loading" class="loading-container">
           <div class="loading"></div>
-          <span>Loading users...</span>
+          <span>{{ t('users.loadingUsers') }}</span>
         </div>
 
         <div v-else-if="error" class="error">
@@ -35,18 +35,18 @@
         </div>
 
         <div v-else-if="users.length === 0" class="empty-state">
-          No users found.
+          {{ t('users.noUsers') }}
         </div>
 
         <table v-else>
           <thead>
             <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Created At</th>
-              <th>Actions</th>
+              <th>{{ t('users.id') }}</th>
+              <th>{{ t('users.name') }}</th>
+              <th>{{ t('users.email') }}</th>
+              <th>{{ t('users.role') }}</th>
+              <th>{{ t('users.createdAt') }}</th>
+              <th>{{ t('users.actions') }}</th>
             </tr>
           </thead>
           <tbody>
@@ -62,7 +62,7 @@
               <td>{{ formatDate(user.created_at) }}</td>
               <td>
                 <button @click="handleDeleteUser(user.id)" class="btn-delete" :disabled="deleting === user.id"
-                  title="Delete user">
+                  :title="t('users.deleteUser')">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M3 6h18" />
@@ -77,43 +77,43 @@
       </div>
 
       <div class="card" v-else>
-        <h2 class="form-title">Create New User</h2>
+        <h2 class="form-title">{{ t('users.formTitle') }}</h2>
 
       <Form ref="formRef" :validation-schema="fieldSchema" @submit="handleCreateUser" class="login-form">
           <div class="form-group">
-            <label for="name">Name</label>
-            <Field id="name" name="name" type="text" class="input" placeholder="Enter full name" />
+            <label for="name">{{ t('users.name') }}</label>
+            <Field id="name" name="name" type="text" class="input" :placeholder="t('users.namePlaceholder')" />
             <ErrorMessage name="name" class="error-message" />
           </div>
 
           <div class="form-group">
-            <label for="email">Email</label>
-            <Field id="email" name="email" type="email" class="input" placeholder="Enter email address" />
+            <label for="email">{{ t('users.email') }}</label>
+            <Field id="email" name="email" type="email" class="input" :placeholder="t('users.emailPlaceholder')" />
             <ErrorMessage name="email" class="error-message" />
           </div>
 
           <div class="form-group">
-            <label for="password">Password</label>
-            <Field id="password" name="password" type="password" class="input" placeholder="Enter password (min 6 characters)" />
+            <label for="password">{{ t('login.password') }}</label>
+            <Field id="password" name="password" type="password" class="input" :placeholder="t('users.passwordPlaceholder')" />
             <ErrorMessage name="password" class="error-message" />
           </div>
 
           <div class="form-group">
-            <label for="role">Role</label>
+            <label for="role">{{ t('users.role') }}</label>
             <Field as="select" id="role" name="role" class="input" required>
-              <option value="">Select a role</option>
-              <option :value="UserRole.ADMIN">Admin</option>
-              <option :value="UserRole.USER">User</option>
+              <option value="">{{ t('users.selectRole') }}</option>
+              <option :value="UserRole.ADMIN">{{ t('users.admin') }}</option>
+              <option :value="UserRole.USER">{{ t('users.user') }}</option>
             </Field>
             <ErrorMessage name="role" class="error-message" />
           </div>
 
           <div class="form-actions">
             <button type="submit" class="btn-submit" :disabled="creating">
-              {{ creating ? 'Creating...' : 'Create User' }}
+              {{ creating ? t('users.creating') : t('users.createUser') }}
             </button>
             <button type="button" class="btn-cancel" @click="resetForm">
-              Reset
+              {{ t('users.reset') }}
             </button>
           </div>
       </Form>
@@ -130,22 +130,25 @@ import Dialog from '@/components/Dialog.vue';
 import { toTypedSchema } from '@vee-validate/zod';
 import { z } from 'zod';
 import { ErrorMessage, Field, Form } from 'vee-validate';
+import { useI18n } from 'vue-i18n';
+
+const { t, locale } = useI18n();
 
 const fieldSchema = toTypedSchema(
   z.object({
     email: z
-      .string({ message: 'Email is required' })
-      .min(1, 'Email is required')
-      .email('Invalid email address'),
+      .string({ message: t('users.emailRequired') })
+      .min(1, t('users.emailRequired'))
+      .email(t('users.invalidEmail')),
     password: z
-      .string({ message: 'Password is required' })
-      .min(1, 'Password is required')
-      .min(6, 'Password must be at least 6 characters'),  
+      .string({ message: t('users.passwordRequired') })
+      .min(1, t('users.passwordRequired'))
+      .min(6, t('users.passwordMinLength')),  
     name: z
-      .string({ message: 'Name is required' })
-      .min(1, 'Name is required'),
+      .string({ message: t('users.nameRequired') })
+      .min(1, t('users.nameRequired')),
     role: z
-      .enum(UserRole, { message: 'Role is required' })
+      .enum([UserRole.ADMIN, UserRole.USER], { message: t('users.roleRequired') })
   })
 );
 
@@ -233,7 +236,7 @@ const handleCreateUser = async (values: any) => {
     };
 
     await usersApi.createUser(userData);
-    showAlert('User created successfully!', 'success');
+    showAlert(t('users.userCreated'), 'success');
     formRef.value?.resetForm();
     await fetchUsers();
 
@@ -250,14 +253,14 @@ const handleCreateUser = async (values: any) => {
 
 const handleDeleteUser = (userId: number) => {
   showDialog(
-    'Delete User',
-    'Are you sure you want to delete this user? This action cannot be undone.',
+    t('users.deleteConfirmTitle'),
+    t('users.deleteConfirmMessage'),
     async () => {
       deleting.value = userId;
 
       try {
         await usersApi.deleteUser(userId);
-        showAlert('User deleted successfully!', 'success');
+        showAlert(t('users.userDeleted'), 'success');
         await fetchUsers();
       } catch (err: any) {
         const errorMsg = err.response?.data?.error || 'Failed to delete user';
@@ -267,13 +270,13 @@ const handleDeleteUser = (userId: number) => {
       }
     },
     'danger',
-    'Delete',
-    'Cancel'
+    t('users.delete'),
+    t('users.cancel')
   );
 };
 
 const formatDate = (date: string) => {
-  return new Date(date).toLocaleDateString('en-US', {
+  return new Date(date).toLocaleDateString(locale.value === 'pt' ? 'pt-BR' : 'en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
