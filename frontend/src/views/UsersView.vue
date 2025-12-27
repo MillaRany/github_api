@@ -79,30 +79,33 @@
       <div class="card" v-else>
         <h2 class="form-title">Create New User</h2>
 
-        <form @submit.prevent="handleCreateUser">
+      <Form :validation-schema="fieldSchema" @submit="handleCreateUser" class="login-form">
           <div class="form-group">
             <label for="name">Name</label>
-            <input v-model="newUser.name" type="text" id="name" required placeholder="Enter full name" />
+            <Field id="name" name="name" type="text" class="input" placeholder="Enter full name" />
+            <ErrorMessage name="name" class="error-message" />
           </div>
 
           <div class="form-group">
             <label for="email">Email</label>
-            <input v-model="newUser.email" type="email" id="email" required placeholder="Enter email address" />
+            <Field id="email" name="email" type="email" class="input" placeholder="Enter email address" />
+            <ErrorMessage name="email" class="error-message" />
           </div>
 
           <div class="form-group">
             <label for="password">Password</label>
-            <input v-model="newUser.password" type="password" id="password" required minlength="6"
-              placeholder="Enter password (min 6 characters)" />
+            <Field id="password" name="password" type="password" class="input" placeholder="Enter password (min 6 characters)" />
+            <ErrorMessage name="password" class="error-message" />
           </div>
 
           <div class="form-group">
             <label for="role">Role</label>
-            <select v-model="newUser.role" id="role" required>
+            <Field as="select" id="role" name="role" class="input" required>
               <option value="">Select a role</option>
               <option :value="UserRole.ADMIN">Admin</option>
               <option :value="UserRole.USER">User</option>
-            </select>
+            </Field>
+            <ErrorMessage name="role" class="error-message" />
           </div>
 
           <div class="form-actions">
@@ -113,7 +116,7 @@
               Reset
             </button>
           </div>
-        </form>
+      </Form>
       </div>
     </div>
 </template>
@@ -124,6 +127,27 @@ import { usersApi } from '@/api/users';
 import { User, UserRole, CreateUserRequest } from '@/types';
 import Alert from '@/components/Alert.vue';
 import Dialog from '@/components/Dialog.vue';
+import { toTypedSchema } from '@vee-validate/zod';
+import { z } from 'zod';
+import { ErrorMessage, Field, Form } from 'vee-validate';
+
+const fieldSchema = toTypedSchema(
+  z.object({
+    email: z
+      .string({ message: 'Email is required' })
+      .min(1, 'Email is required')
+      .email('Invalid email address'),
+    password: z
+      .string({ message: 'Password is required' })
+      .min(1, 'Password is required')
+      .min(6, 'Password must be at least 6 characters'),  
+    name: z
+      .string({ message: 'Name is required' })
+      .min(1, 'Name is required'),
+    role: z
+      .enum(UserRole, { message: 'Role is required' })
+  })
+);
 
 const users = ref<User[]>([]);
 const loading = ref(false);
@@ -446,5 +470,11 @@ table {
   td {
     padding: 0.5rem;
   }
+}
+
+.error-message {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
 </style>

@@ -4,17 +4,17 @@
       <h1 class="login-title">Login</h1>
       <p class="login-subtitle">GitHub API Integration</p>
 
-      <form @submit.prevent="handleLogin" class="login-form">
+      <Form :validation-schema="fieldSchema" @submit="handleLogin" class="login-form">
         <div class="form-group">
           <label class="label" for="email">Email</label>
-          <input id="email" v-model="credentials.email" type="email" class="input" placeholder="Enter your email"
-            required />
+          <Field id="email" name="email" type="email" class="input" placeholder="Enter your email" />
+          <ErrorMessage name="email" class="error-message" />
         </div>
 
         <div class="form-group">
           <label class="label" for="password">Password</label>
-          <input id="password" v-model="credentials.password" type="password" class="input"
-            placeholder="Enter your password" required />
+          <Field id="password" name="password" type="password" class="input" placeholder="Enter your password" />
+          <ErrorMessage name="password" class="error-message" />
         </div>
 
         <div v-if="authStore.error" class="error">
@@ -25,7 +25,7 @@
           <span v-if="authStore.loading" class="loading"></span>
           <span v-else>Login</span>
         </button>
-      </form>
+      </Form>
 
       <div class="login-info">
         <p><strong>Demo credentials:</strong></p>
@@ -37,21 +37,31 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
 import { LoginRequest } from '@/types';
+import { ErrorMessage, Field, Form } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/zod';
+import { z } from 'zod';
+
+const fieldSchema = toTypedSchema(
+  z.object({
+    email: z
+      .string({ message: 'Email is required' })
+      .min(1, 'Email is required')
+      .email('Invalid email address'),
+    password: z
+      .string({ message: 'Password is required' })
+      .min(1, 'Password is required')
+      .min(6, 'Password must be at least 6 characters'),  
+  })
+);
 
 const router = useRouter();
 const authStore = useAuthStore();
 
-const credentials = ref<LoginRequest>({
-  email: '',
-  password: ''
-});
-
-const handleLogin = async () => {
-  const success = await authStore.login(credentials.value);
+const handleLogin = async (values: any) => {
+  const success = await authStore.login(values as LoginRequest);
   if (success) {
     await router.push('/dashboard');
   }
@@ -110,5 +120,11 @@ const handleLogin = async () => {
 
 .login-info p {
   margin: 0.25rem 0;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
 </style>
