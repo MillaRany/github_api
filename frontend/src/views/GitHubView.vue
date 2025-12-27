@@ -4,19 +4,16 @@
     <p class="page-subtitle">Search for GitHub users and view their repositories</p>
 
     <div class="search-card card">
-      <form @submit.prevent="handleSearch" class="search-form">
-        <input
-          v-model="searchUsername"
-          type="text"
-          class="input"
-          placeholder="Enter GitHub username..."
-          required
-        />
+      <Form @submit="handleSearch" class="search-form" :validation-schema="fieldSchema">
+        <div class="search-input-wrapper">
+          <Field id="username" name="username" type="text" class="input" placeholder="Enter GitHub username..." />
+          <ErrorMessage name="username" class="error-message" />
+        </div>
         <button type="submit" class="btn btn-primary" :disabled="searchLoading">
           <span v-if="searchLoading" class="loading"></span>
           <span v-else>Search</span>
         </button>
-      </form>
+      </Form>
     </div>
 
     <div v-if="profileError" class="error card">
@@ -31,7 +28,7 @@
             <h2 class="profile-name">{{ profile.name || profile.login }}</h2>
             <p class="profile-username">@{{ profile.login }}</p>
             <p v-if="profile.bio" class="profile-bio">{{ profile.bio }}</p>
-            
+
             <div class="profile-meta">
               <span v-if="profile.company">🏢 {{ profile.company }}</span>
               <span v-if="profile.location">📍 {{ profile.location }}</span>
@@ -97,6 +94,17 @@ import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { githubApi } from '@/api/github';
 import { GitHubProfile, GitHubRepository } from '@/types';
+import { Field, Form, ErrorMessage } from 'vee-validate';
+import { toTypedSchema } from '@vee-validate/zod';
+import { z } from 'zod';
+
+const fieldSchema = toTypedSchema(
+  z.object({
+    username: z
+      .string({ message: 'Username is required' })
+      .min(1, 'Username is required'),
+  })
+);
 
 const route = useRoute();
 
@@ -109,8 +117,8 @@ const reposLoading = ref(false);
 const profileError = ref<string | null>(null);
 const reposError = ref<string | null>(null);
 
-const handleSearch = async () => {
-  if (!searchUsername.value.trim()) return;
+const handleSearch = async (values: any) => {
+  searchUsername.value = values.username;
 
   searchLoading.value = true;
   profileError.value = null;
@@ -146,7 +154,12 @@ onMounted(() => {
   const username = route.params.username as string;
   if (username) {
     searchUsername.value = username;
-    handleSearch();
+    handleSearch({ username });
+  } else {
+    profile.value = null;
+    repositories.value = [];
+    profileError.value = null;
+    reposError.value = null;
   }
 });
 </script>
@@ -172,8 +185,20 @@ onMounted(() => {
   gap: 1rem;
 }
 
-.search-form .input {
+.search-input-wrapper {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.search-form .input {
+  width: 100%;
+}
+
+.error-message {
+  color: red;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
 }
 
 .profile-section {
