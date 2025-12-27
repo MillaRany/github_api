@@ -79,7 +79,7 @@
       <div class="card" v-else>
         <h2 class="form-title">Create New User</h2>
 
-      <Form :validation-schema="fieldSchema" @submit="handleCreateUser" class="login-form">
+      <Form ref="formRef" :validation-schema="fieldSchema" @submit="handleCreateUser" class="login-form">
           <div class="form-group">
             <label for="name">Name</label>
             <Field id="name" name="name" type="text" class="input" placeholder="Enter full name" />
@@ -152,6 +152,7 @@ const fieldSchema = toTypedSchema(
 const users = ref<User[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
+const formRef = ref<any>(null);
 
 const showCreateForm = ref(false);
 const creating = ref(false);
@@ -195,17 +196,6 @@ const showDialog = (
   dialog.onConfirm = onConfirm;
   dialog.show = true;
 };
-const newUser = ref<{
-  name: string;
-  email: string;
-  password: string;
-  role: UserRole | '';
-}>({
-  name: '',
-  email: '',
-  password: '',
-  role: ''
-});
 
 const fetchUsers = async () => {
   loading.value = true;
@@ -228,28 +218,23 @@ const toggleView = () => {
 };
 
 const resetForm = () => {
-  newUser.value = {
-    name: '',
-    email: '',
-    password: '',
-    role: ''
-  };
+  formRef.value?.resetForm();
 };
 
-const handleCreateUser = async () => {
+const handleCreateUser = async (values: any) => {
   creating.value = true;
 
   try {
     const userData: CreateUserRequest = {
-      name: newUser.value.name,
-      email: newUser.value.email,
-      password: newUser.value.password,
-      role: newUser.value.role as UserRole
+      name: values.name,
+      email: values.email,
+      password: values.password,
+      role: values.role as UserRole
     };
 
     await usersApi.createUser(userData);
     showAlert('User created successfully!', 'success');
-    resetForm();
+    formRef.value?.resetForm();
     await fetchUsers();
 
     setTimeout(() => {
