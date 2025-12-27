@@ -10,61 +10,38 @@ export class UserController {
   ) { }
 
   listUsers = async (req: AuthRequest, res: Response) => {
-    try {
-      const users = await this.userApplication.listUsers();
-      res.json(users);
-    } catch (error) {
-      throw new Error('Failed to fetch users');
-    }
+    const users = await this.userApplication.listUsers();
+    res.json(users);
   };
 
   getCurrentUser = async (req: AuthRequest, res: Response) => {
-    try {
-      if (!req.user) {
-        throw new Error('Unauthorized');
-      }
-
-      const user = await this.userApplication.getUserById(req.user.userId);
-
-      if (user === undefined) {
-        throw new Error('User not found');
-      }
-
-      const userResponse = await this.userApplication.toUserResponse(user);
-      res.json(userResponse);
-    } catch (error) {
-      throw new Error('Failed to fetch user');
+    if (!req.user) {
+      throw new Error('Unauthorized');
     }
+
+    const user = await this.userApplication.getUserById(req.user.userId);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const userResponse = await this.userApplication.toUserResponse(user);
+    res.json(userResponse);
   };
 
   postUser = async (req: AuthRequest, res: Response) => {
-    try {
-      const { name, email, password, role } = req.body;
+    // Dados já validados pelo middleware!
+    const { name, email, password, role } = req.body;
 
-      if (!name || !email || !password || !role) {
-        throw new Error('Name, email, password, and role are required');
-      }
-
-      const newUser = await this.userApplication.createUser(name, email, password, role);
-      res.status(201).json(newUser);
-    } catch (error) {
-      throw new Error('Failed to create user');
-    }
-  }
+    const newUser = await this.userApplication.createUser(name, email, password, role);
+    res.status(201).json(newUser);
+  };
 
   deleteUser = async (req: AuthRequest, res: Response) => {
-    try {
-      const { id } = req.params;
+    // ID já validado e convertido para number pelo middleware!
+    const { id } = req.params;
 
-      if (!id) {
-        return res.status(400).json({ error: 'User ID is required' });
-      }
-
-      await this.userApplication.deleteUser(Number(id));
-      res.status(204).send();
-    } catch (error) {
-      throw new Error('Failed to delete user');
-    }
-  }
-
+    await this.userApplication.deleteUser(Number(id));
+    res.status(204).send();
+  };
 }
