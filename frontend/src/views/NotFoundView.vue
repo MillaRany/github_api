@@ -2,18 +2,15 @@
   <div class="container">
     <div class="not-found">
       <h1 class="not-found-title">404</h1>
-      <p class="not-found-text">{{ t('notFound.message') }}</p>
+      <p class="not-found-text">The page you are looking for does not exist.</p>
       <router-link to="/dashboard" class="btn btn-primary">
-        {{ t('notFound.backHome') }}
+        Back to Home
       </router-link>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n();
 </script>
 
 <style scoped>

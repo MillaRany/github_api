@@ -1,17 +1,17 @@
 <template>
   <div class="container">
-    <h1 class="page-title">{{ t('github.title') }}</h1>
-    <p class="page-subtitle">{{ t('github.subtitle') }}</p>
+    <h1 class="page-title">GitHub Profile Search</h1>
+    <p class="page-subtitle">Search for GitHub users and view their repositories</p>
 
     <div class="search-card card">
       <Form @submit="handleSearch" class="search-form" :validation-schema="fieldSchema">
         <div class="search-input-wrapper">
-          <Field id="username" name="username" type="text" class="input" :placeholder="t('github.usernamePlaceholder')" />
+          <Field id="username" name="username" type="text" class="input" placeholder="Enter GitHub username..." />
           <ErrorMessage name="username" class="error-message" />
         </div>
         <button type="submit" class="btn btn-primary" :disabled="searchLoading">
           <span v-if="searchLoading" class="loading"></span>
-          <span v-else>{{ t('github.search') }}</span>
+          <span v-else>Search</span>
         </button>
       </Form>
     </div>
@@ -38,15 +38,15 @@
             <div class="profile-stats">
               <div class="stat">
                 <strong>{{ profile.public_repos }}</strong>
-                <span>{{ t('github.repositories') }}</span>
+                <span>Repositories</span>
               </div>
               <div class="stat">
                 <strong>{{ profile.followers }}</strong>
-                <span>{{ t('github.followers') }}</span>
+                <span>Followers</span>
               </div>
               <div class="stat">
                 <strong>{{ profile.following }}</strong>
-                <span>{{ t('github.following') }}</span>
+                <span>Following</span>
               </div>
             </div>
           </div>
@@ -54,11 +54,11 @@
       </div>
 
       <div class="card repos-card">
-        <h3 class="repos-title">{{ t('github.repositories') }}</h3>
+        <h3 class="repos-title">Repositories</h3>
 
         <div v-if="reposLoading" class="loading-container">
           <div class="loading"></div>
-          <span>{{ t('github.loadingRepos') }}</span>
+          <span>Loading repositories...</span>
         </div>
 
         <div v-else-if="reposError" class="error">
@@ -66,7 +66,7 @@
         </div>
 
         <div v-else-if="repositories.length === 0" class="empty-state">
-          {{ t('github.noRepos') }}
+          No repositories found.
         </div>
 
         <div v-else class="repos-grid">
@@ -97,15 +97,12 @@ import { GitHubProfile, GitHubRepository } from '@/types';
 import { Field, Form, ErrorMessage } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { z } from 'zod';
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n();
 
 const fieldSchema = toTypedSchema(
   z.object({
     username: z
-      .string({ message: t('github.usernameRequired') })
-      .min(1, t('github.usernameRequired')),
+      .string({ message: 'Username is required' })
+      .min(1, 'Username is required'),
   })
 );
 

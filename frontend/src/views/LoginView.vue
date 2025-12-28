@@ -1,19 +1,19 @@
 <template>
   <div class="login-container">
     <div class="login-card card">
-      <h1 class="login-title">{{ t('login.title') }}</h1>
-      <p class="login-subtitle">{{ t('login.subtitle') }}</p>
+      <h1 class="login-title">Login</h1>
+      <p class="login-subtitle">GitHub API Integration</p>
 
       <Form :validation-schema="fieldSchema" @submit="handleLogin" class="login-form">
         <div class="form-group">
-          <label class="label" for="email">{{ t('login.email') }}</label>
-          <Field id="email" name="email" type="email" class="input" :placeholder="t('login.emailPlaceholder')" />
+          <label class="label" for="email">Email</label>
+          <Field id="email" name="email" type="email" class="input" placeholder="Enter your email" />
           <ErrorMessage name="email" class="error-message" />
         </div>
 
         <div class="form-group">
-          <label class="label" for="password">{{ t('login.password') }}</label>
-          <Field id="password" name="password" type="password" class="input" :placeholder="t('login.passwordPlaceholder')" />
+          <label class="label" for="password">Password</label>
+          <Field id="password" name="password" type="password" class="input" placeholder="Enter your password" />
           <ErrorMessage name="password" class="error-message" />
         </div>
 
@@ -23,14 +23,14 @@
 
         <button type="submit" class="btn btn-primary btn-full" :disabled="authStore.loading">
           <span v-if="authStore.loading" class="loading"></span>
-          <span v-else>{{ t('login.loginButton') }}</span>
+          <span v-else>Login</span>
         </button>
       </Form>
 
       <div class="login-info">
-        <p><strong>{{ t('login.demoCredentials') }}</strong></p>
-        <p>{{ t('login.admin') }}</p>
-        <p>{{ t('login.user') }}</p>
+        <p><strong>Demo credentials:</strong></p>
+        <p>Admin: admin@example.com / admin123</p>
+        <p>User: user@example.com / user123</p>
       </div>
     </div>
   </div>
@@ -43,20 +43,17 @@ import { LoginRequest } from '@/types';
 import { ErrorMessage, Field, Form } from 'vee-validate';
 import { toTypedSchema } from '@vee-validate/zod';
 import { z } from 'zod';
-import { useI18n } from 'vue-i18n';
-
-const { t } = useI18n();
 
 const fieldSchema = toTypedSchema(
   z.object({
     email: z
-      .string({ message: t('login.emailRequired') })
-      .min(1, t('login.emailRequired'))
-      .email(t('login.invalidEmail')),
+      .string({ message: 'Email is required' })
+      .min(1, 'Email is required')
+      .email('Invalid email address'),
     password: z
-      .string({ message: t('login.passwordRequired') })
-      .min(1, t('login.passwordRequired'))
-      .min(6, t('login.passwordMinLength')),  
+      .string({ message: 'Password is required' })
+      .min(1, 'Password is required')
+      .min(6, 'Password must be at least 6 characters'),  
   })
 );
 
