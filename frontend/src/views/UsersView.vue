@@ -1,124 +1,117 @@
 <template>
   <Alert :show="alert.show" :message="alert.message" :type="alert.type" @close="alert.show = false" />
-  
-  <Dialog
-    :show="dialog.show"
-    :title="dialog.title"
-    :message="dialog.message"
-    :type="dialog.type"
-    :confirm-text="dialog.confirmText"
-    :cancel-text="dialog.cancelText"
-    @confirm="dialog.onConfirm"
-    @cancel="dialog.show = false"
-    @close="dialog.show = false"
-  />
 
-    <div class="container">
-      <h1 class="page-title">Users Management</h1>
-      <p class="page-subtitle">Admin only - View all registered users</p>
+  <Dialog :show="dialog.show" :title="dialog.title" :message="dialog.message" :type="dialog.type"
+    :confirm-text="dialog.confirmText" :cancel-text="dialog.cancelText" @confirm="dialog.onConfirm"
+    @cancel="dialog.show = false" @close="dialog.show = false" />
 
-      <div class="action-bar">
-        <button @click="toggleView" class="btn-toggle"
-          :class="{ 'btn-primary': !showCreateForm, 'btn-secondary': showCreateForm }">
-          {{ showCreateForm ? 'View Users' : 'Create New User' }}
-        </button>
+  <div class="container">
+    <h1 class="page-title">Users Management</h1>
+    <p class="page-subtitle">Admin only - View all registered users</p>
+
+    <div class="action-bar">
+      <button @click="toggleView" class="btn-toggle"
+        :class="{ 'btn-primary': !showCreateForm, 'btn-secondary': showCreateForm }">
+        {{ showCreateForm ? 'View Users' : 'Create New User' }}
+      </button>
+    </div>
+
+    <div class="card" v-if="!showCreateForm">
+      <div v-if="loading" class="loading-container">
+        <div class="loading"></div>
+        <span>Loading users...</span>
       </div>
 
-      <div class="card" v-if="!showCreateForm">
-        <div v-if="loading" class="loading-container">
-          <div class="loading"></div>
-          <span>Loading users...</span>
-        </div>
-
-        <div v-else-if="error" class="error">
-          {{ error }}
-        </div>
-
-        <div v-else-if="users.length === 0" class="empty-state">
-          No users found.
-        </div>
-
-        <table v-else>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Created At</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="user in users" :key="user.id">
-              <td>{{ user.id }}</td>
-              <td>{{ user.name }}</td>
-              <td>{{ user.email }}</td>
-              <td>
-                <span :class="['badge', `badge-${user.role}`]">
-                  {{ user.role }}
-                </span>
-              </td>
-              <td>{{ formatDate(user.created_at) }}</td>
-              <td>
-                <button @click="handleDeleteUser(user.id)" class="btn-delete" :disabled="deleting === user.id"
-                  title="Delete user">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M3 6h18" />
-                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                  </svg>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div v-else-if="error" class="error">
+        {{ error }}
       </div>
 
-      <div class="card" v-else>
-        <h2 class="form-title">Create New User</h2>
+      <div v-else-if="users.length === 0" class="empty-state">
+        No users found.
+      </div>
+
+      <table v-else>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Created At</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="user in users" :key="user.id">
+            <td>{{ user.id }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+              <span :class="['badge', `badge-${user.role}`]">
+                {{ user.role }}
+              </span>
+            </td>
+            <td>{{ formatDate(user.created_at) }}</td>
+            <td>
+              <button @click="handleDeleteUser(user.id)" class="btn-delete" :disabled="deleting === user.id"
+                title="Delete user">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M3 6h18" />
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                </svg>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card" v-else>
+      <h2 class="form-title">Create New User</h2>
 
       <Form ref="formRef" :validation-schema="fieldSchema" @submit="handleCreateUser" class="login-form">
-          <div class="form-group">
-            <label for="name">Name</label>
-            <Field id="name" name="name" type="text" class="input" placeholder="Enter full name" />
-            <ErrorMessage name="name" class="error-message" />
-          </div>
+        <div class="form-group">
+          <label for="name">Name</label>
+          <Field id="name" name="name" type="text" class="input" placeholder="Enter full name" />
+          <ErrorMessage name="name" class="error-message" />
+        </div>
 
-          <div class="form-group">
-            <label for="email">Email</label>
-            <Field id="email" name="email" type="email" class="input" placeholder="Enter email address" />
-            <ErrorMessage name="email" class="error-message" />
-          </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <Field id="email" name="email" type="email" class="input" placeholder="Enter email address" />
+          <ErrorMessage name="email" class="error-message" />
+        </div>
 
-          <div class="form-group">
-            <label for="password">Password</label>
-            <Field id="password" name="password" type="password" class="input" placeholder="Enter password (min 6 characters)" />
-            <ErrorMessage name="password" class="error-message" />
-          </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <Field id="password" name="password" type="password" class="input"
+            placeholder="Enter password (min 6 characters)" />
+          <ErrorMessage name="password" class="error-message" />
+        </div>
 
-          <div class="form-group">
-            <label for="role">Role</label>
-            <Field as="select" id="role" name="role" class="input" required>
-              <option value="">Select a role</option>
-              <option :value="UserRole.ADMIN">Admin</option>
-              <option :value="UserRole.USER">User</option>
-            </Field>
-            <ErrorMessage name="role" class="error-message" />
-          </div>
+        <div class="form-group">
+          <label for="role">Role</label>
+          <Field as="select" id="role" name="role" class="input" required>
+            <option value="">Select a role</option>
+            <option :value="UserRole.ADMIN">Admin</option>
+            <option :value="UserRole.USER">User</option>
+          </Field>
+          <ErrorMessage name="role" class="error-message" />
+        </div>
 
-          <div class="form-actions">
-            <button type="submit" class="btn-submit" :disabled="creating">
-              {{ creating ? 'Creating...' : 'Create User' }}
-            </button>
-            <button type="button" class="btn-cancel" @click="resetForm">
-              Reset
-            </button>
-          </div>
+        <div class="form-actions">
+          <button type="submit" class="btn-submit" :disabled="creating">
+            {{ creating ? 'Creating...' : 'Create User' }}
+          </button>
+          <button type="button" class="btn-cancel" @click="resetForm">
+            Reset
+          </button>
+        </div>
       </Form>
-      </div>
     </div>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -140,7 +133,7 @@ const fieldSchema = toTypedSchema(
     password: z
       .string({ message: 'Password is required' })
       .min(1, 'Password is required')
-      .min(6, 'Password must be at least 6 characters'),  
+      .min(6, 'Password must be at least 6 characters'),
     name: z
       .string({ message: 'Name is required' })
       .min(1, 'Name is required'),
@@ -171,7 +164,7 @@ const dialog = reactive({
   type: 'info' as 'danger' | 'warning' | 'info' | 'success',
   confirmText: 'Confirm',
   cancelText: 'Cancel',
-  onConfirm: () => {}
+  onConfirm: () => { }
 });
 
 const showAlert = (message: string, type: 'success' | 'error' | 'warning' | 'info') => {
@@ -257,6 +250,17 @@ const handleDeleteUser = (userId: number) => {
 
       try {
         await usersApi.deleteUser(userId);
+
+        const user = localStorage.getItem('user');
+        const parsedUser = user ? JSON.parse(user) : null;
+
+        if (parsedUser && parsedUser.id === userId) {
+          localStorage.removeItem('token');
+          localStorage.removeItem('refresh_token');
+          window.location.href = '/login';
+          return;
+        }
+
         showAlert('User deleted successfully!', 'success');
         await fetchUsers();
       } catch (err: any) {
