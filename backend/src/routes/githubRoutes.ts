@@ -10,7 +10,7 @@ const githubController = container.resolve(GithubController);
 
 router.use(authenticate);
 
-router.get('/profile/:username', validateParams(githubUsernameSchema), githubController.getGitHubProfile);
-router.get('/repos/:username', validateParams(githubUsernameSchema), githubController.getGitHubRepositories);
+router.get('/users/:username', validateParams(githubUsernameSchema), githubController.getGitHubProfile);
+router.get('/users/:username/repos', validateParams(githubUsernameSchema), githubController.getGitHubRepositories);
 
 export default router;

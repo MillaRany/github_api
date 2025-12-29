@@ -16,15 +16,6 @@ export interface IUserModel{
 
 @injectable()
 export class UserModel implements IUserModel {
-  static findAll() {
-    throw new Error('Method not implemented.');
-  }
-  static findById(userId: number) {
-    throw new Error('Method not implemented.');
-  }
-  static toUserResponse(user: any): any {
-    throw new Error('Method not implemented.');
-  }
   async findByEmail(email: string): Promise<User | undefined> {
     return database.get<User>(
       'SELECT * FROM users WHERE email = ?',
