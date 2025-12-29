@@ -17,14 +17,14 @@ export interface IUserModel{
 @injectable()
 export class UserModel implements IUserModel {
   async findByEmail(email: string): Promise<User | undefined> {
-    return database.get<User>(
+    return await database.get<User>(
       'SELECT * FROM users WHERE email = ?',
       [email]
     );
   }
 
   async findById(id: number): Promise<User | undefined> {
-    return database.get<User>(
+    return await database.get<User>(
       'SELECT * FROM users WHERE id = ?',
       [id]
     );
