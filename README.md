@@ -1,12 +1,30 @@
- # GitHub API - Projeto
+# GitHub API - Projeto
+
+## Pré-requisitos
+
+### Para desenvolvimento local:
+- **Node.js** >= 18 (recomendado: >= 20 LTS)
+
+### Para Docker (opcional):
+- **Docker** >= 20.10
+- **Docker Compose** >= 2.0
+- **Make** (opcional, para usar `make up`)
+
+Variáveis de ambiente importantes (backend):
+- `JWT_SECRET` — obrigatório (token signing).
+- `JWT_EXPIRES_IN` — opcional (ex: `30m`) default: `30m`.
+- `GITHUB_TOKEN` — opcional (melhora rate limit das chamadas ao GitHub).
+- `DATABASE_PATH` — opcional (path para o arquivo SQLite, ja setado).
+
+**Frontend:**
+- `VITE_API_URL` — opcional (URL da API) default: `http://localhost:3000/api`
+
 
 ## Setup do projeto
 
-- Pré-requisitos: `node` (>=16), `npm` ou `pnpm`.
 - Clone o repositório e instale dependências:
 
 ```bash
-
 # Backend
 cd backend
 npm install
@@ -17,76 +35,25 @@ npm run init-db
 # Rodar em dev
 npm run dev
 
-# Frontend
+# Agora o frontend
 cd ../frontend
-npm install
-npm run dev
-
-
-```
-
-Também é possível subir a aplicação com Docker através do alvo `make up` (é necessário ter Docker e docker-compose instalados):
-
-```bash
-# Requer Docker e docker-compose
-make up
-
-# Para parar e remover os containers
-make down
-```
-
-Variáveis de ambiente importantes (backend):
-- `JWT_SECRET` — obrigatório (token signing).
-- `JWT_EXPIRES_IN` — opcional (ex: `30m`).
-- `GITHUB_TOKEN` — opcional (melhora rate limit das chamadas ao GitHub).
-- `DATABASE_PATH` — opcional (path para o arquivo SQLite).
-
- # GitHub API - Projeto
-
-## Setup do projeto
-
-- Pré-requisitos: `node` (>=16), `npm` ou `pnpm`.
-- Clone o repositório e instale dependências:
-
-```bash
-git clone <repo-url>
-cd github_api
-
-# Backend
-cd backend
-npm install
-
-# Inicializar DB (seed padrão cria usuário admin)
-npm run init-db
-
-# Rodar em dev
-npm run dev
-
-# Em outra aba: Frontend
-cd ../frontend
-npm install
+npm install --legacy-peer-deps # caso tenha problemas com as dependências, pode usar essa flag
 npm run dev
 ```
 
 Também é possível subir a aplicação com Docker através do alvo `make up` (é necessário ter Docker e docker-compose instalados):
 
 ```bash
-# Requer Docker e docker-compose
 make up
 
-# Para parar e remover os containers
-make down
-```
+# caso nao tenha o make instalado, pode usar o docker-compose
+docker-compose up -d --build
 
-Variáveis de ambiente importantes (backend):
-- `JWT_SECRET` — obrigatório (token signing).
-- `JWT_EXPIRES_IN` — opcional (ex: `30m`).
-- `GITHUB_TOKEN` — opcional (melhora rate limit das chamadas ao GitHub).
-- `DATABASE_PATH` — opcional (path para o arquivo SQLite).
+```
 
 ## Usuários seed
 
-O projeto inclui um seed/init para facilitar testes locais. Após executar `npm run init-db` no `backend`, dois usuários serão criados por padrão:
+O projeto inclui um seed/init para facilitar testes:
 
 - **Admin**
   - **Email:** admin@example.com
@@ -98,36 +65,47 @@ O projeto inclui um seed/init para facilitar testes locais. Após executar `npm 
 
 ## Decisões técnicas
 
-- Injeção de dependência: **tsyringe** para desacoplamento e testabilidade.
+- Injeção de dependência: **tsyringe** injeção de dependências e testabilidade.
 - Validação: **Zod** (esquemas e middleware de validação para `body`, `params`, `query`).
-- Persistência: **SQLite** (leve e simples para PoC/development). Decisão de NÃO usar ORM inicialmente para manter o projeto leve e transparente; queries diretas + adapters via interfaces.
+- Persistência: **SQLite** (leve e simples para desenvolvimento). Decisão de NÃO usar ORM inicialmente para manter o projeto leve e transparente; queries diretas + adapters via interfaces.
 - Autenticação: **JWT** (senha com `bcryptjs`).
-- Cliente HTTP: **axios** encapsulado em `infrastructure/httpClient` para chamadas ao GitHub.
-- Testes: **Jest** com estrutura para unit tests; recomenda-se focar em `application` e `controllers` com mocks de interfaces.
+- Cliente HTTP: **axios** encapsulado em `infrastructure/httpClient` para chamadas ao GitHub, centralizando as chamadas e tratando erros.
+- Testes: **Jest** com estrutura para unit tests;
 
 Decisões adicionais e motivação técnica:
 
 - Adotar **Zod** de forma sistemática para evitar erros por inputs mal formados: todos os contratos de entrada devem ter schemas em `backend/src/schemas` e serem aplicados via middleware (`validateBody`, `validateParams`, `validateQuery`). Isso reduz bugs por contrato inválido e facilita respostas de erro padronizadas.
-- **Manter Clean Architecture** — separar responsabilidades entre `controllers`, `application` (casos de uso) e `models` (persistência). Comunicar entre camadas apenas por **interfaces**/contratos (ex.: `IUserModel`, `IHttpClient`) para evitar que camadas conheçam implementações concretas. Isso facilita testes e evolução do projeto.
-- **Testes unitários com foco em edge cases**: priorizar testes que cubram situações difíceis de reproduzir manualmente (ex.: rate-limit do GitHub, respostas faltando campos, erros parciais, falhas de IO do DB, conflitos UNIQUE). Usar mocks/spies nas interfaces para isolar e garantir comportamento correto da camada `application`.
+- **Manter Clean Architecture** — separar responsabilidades entre `controllers`, `application` (casos de uso) e `models` (persistência). Comunicar entre camadas apenas por **interfaces**/contratos (ex.: `IUserModel`, `IHttpClient`) para evitar que camadas conheçam implementações concretas. Facilitando os testes.
 - **Decisão sobre ORM:** optar por **não usar ORM** no início para manter o projeto leve e de fácil compreensão. Embora a introdução de um ORM (Prisma/TypeORM) possa trazer benefícios a médio prazo, a migração posterior exigirá trabalho adicional nas queries e na adaptação das interfaces — por isso a escolha de mantê-lo fora do escopo inicial.
 
-## Pontos de melhoria (priorizados)
+**Frontend:**
+
+- **State Management: Pinia** — escolhido para gerenciamento de estado reativo. Store centralizada para autenticação com computed properties (`isAuthenticated`, `isAdmin`) e persistência em localStorage para manter sessão entre reloads.
+
+- **Validação de Formulários: VeeValidate + Zod** — validação declarativa e type-safe. Garantem consistência de validação.
+
+- **Build Tool: Vite** — escolhido por desenvolvimento rápido e build otimizado. Configurado com path aliases (`@/`) para imports limpos e proxy para API durante desenvolvimento.
+
+- **Interceptors Axios** — implementação de interceptors para adicionar token automaticamente em todas as requisições e tratamento centralizado de erros 401 (logout automático em falhas de autenticação).
+
+- **Composition API** — uso consistente da Composition API do Vue 3 para melhor organização de lógica, reutilização e type-safety com TypeScript.
+
+
+## Pontos de melhoria
 
 1. Segurança e configuração
-   - Validar e exigir `JWT_SECRET` no startup; falhar com mensagem clara se ausente.
    - Mover fluxo de sessão no frontend para cookie `HttpOnly, Secure, SameSite` ou implementar refresh tokens.
-   - Não logar secrets (`GITHUB_TOKEN`, senhas).
 
-2. Validação e robustez
-   - Cobrir todos os endpoints com esquemas Zod (`body`, `params`, `query`).
-   - Retornar erros padronizados com detalhes dos erros de validação.
-
-3. Resiliência e performance
+2. Resiliência e performance
    - Implementar retry/exponential backoff para chamadas ao GitHub e respeitar `Retry-After`/rate-limit headers.
    - Cachear respostas externas (in-memory ou Redis) com TTL para reduzir chamadas repetidas.
    - Adicionar rate limiting em endpoints sensíveis (login, criação de recursos) com `express-rate-limit`.
    - Aplicar circuit breaker (ex.: `opossum`) para evitar falhas em cascata.
+
+3. Observability e manutenção
+   - Integrar logger estruturado (`pino` ou `winston`).
+   - Expor métricas e traces (Prometheus + OpenTelemetry).
+   - Substituir `throw new Error(...)` por classes de erro customizadas para mapeamento consistente no `errorHandler`.
 
 4. Testes e CI
    - Adicionar testes de integração (rotas principais) e e2e (Cypress/Playwright).
@@ -135,26 +113,22 @@ Decisões adicionais e motivação técnica:
    - Pipeline CI (GitHub Actions) com lint, type-check, testes e coverage gating.
 
 5. Banco de dados e migrações
-   - Documentar `DATABASE_PATH` e adicionar ferramenta de migrations (ex.: `knex`, `umzug`) se o projeto crescer.
+   - Adicionar ferramenta de migrations (ex.: `knex`, `umzug`) se o projeto crescer.
 
-## Melhorias no Frontend (recomendações)
 
-As seguintes melhorias e decisões são recomendadas para o frontend; coloquei ações imediatas e de médio prazo:
+## Checklist de requisitos
 
-- **Autenticação e segurança**: use cookies `HttpOnly, Secure, SameSite` para sessões em vez de `localStorage`. Planeje um fluxo de refresh token no backend e trate `401` via interceptor do `axios`.
+**Backend:**
+- Node.js + Express + TypeScript
+- SQLite como banco de dados
+- JWT para autenticação
+- Todos os endpoints implementados conforme especificação
+- Middleware de autenticação e autorização
+- Tratamento de erros
 
-- **HTTP client centralizado**: mantenha `src/api/axios.ts` com interceptors para anexar token, tratar 401 (refresh/logout) e implementar retries/backoff para chamadas externas.
-
-- **Validação de formulários**: adote `zod` em formulários críticos (login, criação de usuário) para evitar requisições com dados mal formados.
-
-- **Gerenciamento de estado e tipos**: organize `Pinia` stores por domínio (auth, users, ui) e compartilhe tipos TypeScript com o backend (OpenAPI / geração de tipos) para evitar inconsistências.
-
-- **Performance e UX**: habilite lazy-loading de rotas e code-splitting com Vite; padronize mensagens de erro/loading e trate rate-limit com avisos apropriados ao usuário.
-
-- **Testes e observability**: adicione testes unitários para componentes críticos, e2e (Cypress/Playwright) para fluxos principais e instrumente erros com Sentry/LogRocket em produção.
-
-Pequenas ações imediatas (quick wins):
-
-- Criar `src/api/axios.ts` com interceptor para 401 e anexar token.
-- Migrar armazenamento de token para cookie HttpOnly (coordenar backend).
-- Adicionar `zod` em formulários de `LoginView` e `UsersView`.
+**Frontend:**
+- Vue 3 + TypeScript
+- Vue Router com guards por role
+- Axios para chamadas HTTP
+- Todas as telas implementadas (Login, Dashboard, Users, GitHub)
+- Componentização básica
