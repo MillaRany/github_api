@@ -25,7 +25,7 @@ export class UserModel implements IUserModel {
 
   async findById(id: number): Promise<User | undefined> {
     return database.get<User>(
-      'SELECT id, email, password FROM users WHERE id = ?',
+      'SELECT * FROM users WHERE id = ?',
       [id]
     );
   }
