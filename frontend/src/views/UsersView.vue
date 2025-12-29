@@ -116,6 +116,8 @@
 
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue';
+import { useRouter } from 'vue-router';
+import { useAuthStore } from '@/stores/auth';
 import { usersApi } from '@/api/users';
 import { User, UserRole, CreateUserRequest } from '@/types';
 import Alert from '@/components/Alert.vue';
@@ -146,6 +148,9 @@ const users = ref<User[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
 const formRef = ref<any>(null);
+
+const router = useRouter();
+const authStore = useAuthStore();
 
 const showCreateForm = ref(false);
 const creating = ref(false);
@@ -251,13 +256,9 @@ const handleDeleteUser = (userId: number) => {
       try {
         await usersApi.deleteUser(userId);
 
-        const user = localStorage.getItem('user');
-        const parsedUser = user ? JSON.parse(user) : null;
-
-        if (parsedUser && parsedUser.id === userId) {
-          localStorage.removeItem('token');
-          localStorage.removeItem('refresh_token');
-          window.location.href = '/login';
+        if (authStore.user && authStore.user.id === userId) {
+          authStore.logout();
+          router.push('/login');
           return;
         }
 
